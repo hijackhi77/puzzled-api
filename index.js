@@ -8,8 +8,13 @@ const port = process.env.PORT
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json())
 
-app.get('/', (req, res) => {
-    res.send(`Welcome to ${appName}`)
-})
+const index = require('./routes/index')
+app.get('/', index)
+
+const huarongDao = require('./routes/huarongDao')
+app.use('/huarong-dao', huarongDao)
+
+const test = require('./routes/test')
+app.use('/test', test)
 
 app.listen(port, () => console.log(`${appName} starts listening on port ${port}!`))
