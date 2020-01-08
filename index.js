@@ -3,13 +3,16 @@ const express = require('express')
 const { appName } = require('./config')
 
 const app = express()
-const port = process.env.PORT
+const port = typeof process.env.PORT === 'undefined' ? 3000 : process.env.PORT
 
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json())
 
 const index = require('./routes/index')
 app.get('/', index)
+
+const slidingPuzzle = require('./routes/slidingPuzzle')
+app.use('/sliding-puzzle', slidingPuzzle)
 
 const huarongDao = require('./routes/huarongDao')
 app.use('/huarong-dao', huarongDao)
