@@ -7,6 +7,9 @@ const port = typeof process.env.PORT === 'undefined' ? 3000 : process.env.PORT
 
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json())
+// Enable all CORS requests
+const cors = require('cors')
+app.use(cors())
 
 const index = require('./routes/index')
 app.get('/', index)
