@@ -3,20 +3,24 @@ import math
 import copy
 from collections import deque
 import heapq
-import json
+from lib.utils import printToNode
 
 
 def read_puzzle(puzzle_str):
+	# TODO: implement parsing for non 3*3 puzzles
 	puzzle = []
 	size = int(math.sqrt(len(puzzle_str)))
-	index = 0
-	for i in range(size):
-		row = []
-		for j in range(size):
-			row.append(int(puzzle_str[index]))
-			index += 1
-		puzzle.append(row)
-	return State(puzzle, None)
+	if size**2 == len(puzzle_str):
+		index = 0
+		for i in range(size):
+			row = []
+			for j in range(size):
+				row.append(int(puzzle_str[index]))
+				index += 1
+			puzzle.append(row)
+		return State(puzzle, None)
+	else:
+		return None
 
 
 class State:
@@ -81,17 +85,18 @@ def bfs(initial_state):
 	frontier.append(initial_state)
 	expanded = set()
 	expanded.add(str(initial_state.puzzle))
+	expanded_states = []
+	expanded_states.append(initial_state.puzzle)
 
-	num_expanded = 0
 	num_generated = 0
 	i = 0
 	while frontier and i < 10:
 		curr_state = frontier.popleft()
 
-		if is_goal(curr_state): return [curr_state, num_expanded, num_generated]
+		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
-		num_expanded += 1
+		expanded_states.append(curr_state.puzzle)
 		for successor in successors:
 			if str(successor.puzzle) not in expanded:
 				num_generated += 1
@@ -105,16 +110,17 @@ def dfs(initial_state):
 	frontier.append(initial_state)
 	expanded = set()
 	expanded.add(str(initial_state))
+	expanded_states = []
+	expanded_states.append(initial_state.puzzle)
 
-	num_expanded = 0
 	num_generated = 0
 	while frontier:
 		curr_state = frontier.pop()
 
-		if is_goal(curr_state): return [curr_state, num_expanded, num_generated]
+		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
-		num_expanded += 1
+		expanded_states.append(curr_state.puzzle)
 		for successor in successors:
 			if str(successor) not in expanded:
 				num_generated += 1
@@ -146,20 +152,21 @@ def get_f(state):
 	return get_heuristic(state) + get_cost(state)
 
 def a_star(initial_state):
-	num_expanded = 0
 	num_generated = 0
 	frontier = []
 	heapq.heappush(frontier, (get_f(initial_state), num_generated, initial_state))
 	expanded = set()
 	expanded.add(str(initial_state))
+	expanded_states = []
+	expanded_states.append(initial_state.puzzle)
 	
 	while frontier:
 		curr_state = heapq.heappop(frontier)[2]
 
-		if is_goal(curr_state): return [curr_state, num_expanded, num_generated]
+		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
-		num_expanded += 1
+		expanded_states.append(curr_state.puzzle)
 		for successor in successors:
 			if str(successor) not in expanded:
 				num_generated += 1
@@ -169,10 +176,12 @@ def a_star(initial_state):
 
 
 def main(argv):
-	usage = "usage: python3 sliding_puzzle.py -s <search method> -p <puzzle>"
+	# usage = "usage: python3 sliding_puzzle.py -s <search method> -p <puzzle>"
 	if len(argv) != 5: 
-		print(usage)
-		sys.exit(1)
+		res_obj = {}
+		res_obj['able_to_solve'] = False
+		res_obj['error'] = "Invalid parameters"
+		printToNode(res_obj)
 	
 	search_method = ""
 	initial_puzzle = ""
@@ -185,36 +194,53 @@ def main(argv):
 			i += 1
 			initial_puzzle = argv[i]
 		else:
-			print(usage)
-			sys.exit(1)
+			res_obj = {}
+			res_obj['able_to_solve'] = False
+			res_obj['error'] = "Invalid parameters"
+			printToNode(res_obj)
 		i += 1
 
 	if search_method not in ("bfs", "dfs", "astar") \
 	or not initial_puzzle:
-		print(usage)
-		sys.exit(1)
-
-	goal_state = None
+		res_obj = {}
+		res_obj['able_to_solve'] = False
+		res_obj['error'] = "Invalid parameters"
+		printToNode(res_obj)
+	#################################################################
+	
 	initial_state = read_puzzle(initial_puzzle)
-	if search_method == "bfs":
-		goal_state, num_expanded, num_generated = bfs(initial_state)
-	elif search_method == "dfs":
-		goal_state, num_expanded, num_generated = dfs(initial_state)
-	elif search_method == "astar":
-		goal_state, num_expanded, num_generated = a_star(initial_state)
-	
-	obj = {}
-	if goal_state:
-		obj['steps'] = []
+	result = None
+	if initial_state:	
+		if search_method == "bfs":
+			result = bfs(initial_state)
+		elif search_method == "dfs":
+			result = dfs(initial_state)
+		elif search_method == "astar":
+			result = a_star(initial_state)
+	else:
+		res_obj = {}
+		res_obj['able_to_solve'] = False
+		res_obj['error'] = "Invalid input puzzle"
+		printToNode(res_obj)
+		
+	if result:
+		res_obj = {}
+		res_obj['able_to_solve'] = True
+		[goal_state, expanded_states, num_generated] = result
+		res_obj['num_steps'] = 0
+		res_obj['steps'] = []
 		while goal_state.parent:
-			# print(str(goal_state))
-			obj['steps'].append(goal_state.puzzle)
+			res_obj['num_steps'] += 1
+			res_obj['steps'].append(goal_state.puzzle)
 			goal_state = goal_state.parent
-	
-	# Convert into JSON
-	obj_json = json.dumps(obj)
-	print(obj_json)
-	sys.exit(0)
+		res_obj['num_expanded'] = len(expanded_states)
+		res_obj['expanded'] = expanded_states
+		res_obj['num_generated'] = num_generated
+		printToNode(res_obj)
+	else:
+		res_obj = {}
+		res_obj['able_to_solve'] = False
+		printToNode(res_obj)
 
 	
 #####################################################################
