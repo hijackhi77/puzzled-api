@@ -13,8 +13,8 @@ let prePy = (req) => {
         }
     } else if (req._parsedUrl.pathname === '/solve' && req.method === 'GET') {
         req.py.command.push('./python/scripts/sliding_puzzle.py')
-        req.py.command.push('-s', req.query['method'])
-        req.py.command.push('-p', req.query['puzzle'])
+        req.py.command.push('-s', req.body['method'])
+        req.py.command.push('-p', req.body['puzzle'])
     }
 }
 

@@ -86,7 +86,6 @@ def bfs(initial_state):
 	expanded = set()
 	expanded.add(str(initial_state.puzzle))
 	expanded_states = []
-	expanded_states.append(initial_state.puzzle)
 
 	num_generated = 0
 	i = 0
@@ -111,7 +110,6 @@ def dfs(initial_state):
 	expanded = set()
 	expanded.add(str(initial_state))
 	expanded_states = []
-	expanded_states.append(initial_state.puzzle)
 
 	num_generated = 0
 	while frontier:
@@ -158,7 +156,6 @@ def a_star(initial_state):
 	expanded = set()
 	expanded.add(str(initial_state))
 	expanded_states = []
-	expanded_states.append(initial_state.puzzle)
 	
 	while frontier:
 		curr_state = heapq.heappop(frontier)[2]
