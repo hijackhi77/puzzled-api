@@ -6,6 +6,6 @@ router.get('/', (req, res, next) => {
     res.send('Sliding Puzzle')
 })
 
-router.get('/solve', [runPy])
+router.post('/solve', [runPy])
 
 module.exports = router

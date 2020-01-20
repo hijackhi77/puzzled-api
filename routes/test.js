@@ -15,6 +15,6 @@ router.get('/validate-sign', (req, res, next) => {
     res.status(200).send({ isValid: sign(req.body, 'secret') == req.body.sign })
 })
 
-router.get('/run-python', runPy)
+router.post('/run-python', runPy)
 
 module.exports = router

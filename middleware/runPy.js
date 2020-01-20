@@ -5,13 +5,13 @@ let prePy = (req) => {
     req.py.command = []
 
     // Find the coresponding script name
-    if (req._parsedUrl.pathname === '/run-python' && req.method === 'GET') {
+    if (req._parsedUrl.pathname === '/run-python' && req.method === 'POST') {
         req.py.command.push('./python/scripts/test.py')
         // Append other parameters
         for (key in req.query) {
             req.py.command.push(req.query[key])
         }
-    } else if (req._parsedUrl.pathname === '/solve' && req.method === 'GET') {
+    } else if (req._parsedUrl.pathname === '/solve' && req.method === 'POST') {
         req.py.command.push('./python/scripts/sliding_puzzle.py')
         req.py.command.push('-m', req.body['method'])
         req.py.command.push('-p', req.body['puzzle'])
