@@ -13,8 +13,9 @@ let prePy = (req) => {
         }
     } else if (req._parsedUrl.pathname === '/solve' && req.method === 'GET') {
         req.py.command.push('./python/scripts/sliding_puzzle.py')
-        req.py.command.push('-s', req.body['method'])
+        req.py.command.push('-m', req.body['method'])
         req.py.command.push('-p', req.body['puzzle'])
+        req.py.command.push('-s', req.body['size'])
     }
 }
 
@@ -26,13 +27,17 @@ let runPy = (req, res, next) => {
         res.write(JSON.parse(JSON.stringify(data.toString())))
     })
     process.stdout.on('end', () => {
-        res.status(200).send()
+        // TODO: possible extra stuff
     })
     process.stderr.on('data', (data) => {
         // TODO: implement logger
         console.error(`[ERROR] ${data}`)
     })
     process.on('close', (code) => {
+        if (code === 1) {
+            res.status(400).send("Invalid Request")
+        }
+        res.status(200).send()
         console.log(`[INFO] Child process exited with code ${code}`)
     })
 }

@@ -1,26 +1,8 @@
 import sys
-import math
 import copy
 from collections import deque
 import heapq
-from lib.utils import printToNode
-
-
-def read_puzzle(puzzle_str):
-	# TODO: implement parsing for non 3*3 puzzles
-	puzzle = []
-	size = int(math.sqrt(len(puzzle_str)))
-	if size**2 == len(puzzle_str):
-		index = 0
-		for i in range(size):
-			row = []
-			for j in range(size):
-				row.append(int(puzzle_str[index]))
-				index += 1
-			puzzle.append(row)
-		return State(puzzle, None)
-	else:
-		return None
+from lib.utils import *
 
 
 class State:
@@ -28,12 +10,11 @@ class State:
 		self.puzzle = copy.deepcopy(puzzle)
 		self.parent = parent # reference
 		self.cost = parent.cost+1 if parent else 0
-		self.height = len(puzzle)
-		self.width = len(puzzle[0])
+		self.size = len(puzzle)
 
 	def get_while_tile(self):
-		for i in range(self.height):
-			for j in range(self.width):
+		for i in range(self.size):
+			for j in range(self.size):
 				if self.puzzle[i][j] == 0:
 					return (i, j)
 		return None
@@ -43,13 +24,41 @@ class State:
 		row, col = self.get_while_tile()
 		if row > 0:
 			successors.append(State(swap(self.puzzle, (row-1, col), (row, col)), self))
-		if row < self.height - 1:
+		if row < self.size - 1:
 			successors.append(State(swap(self.puzzle, (row+1, col), (row, col)), self))
 		if col > 0:
 			successors.append(State(swap(self.puzzle, (row, col-1), (row, col)), self))
-		if col < self.width - 1:
+		if col < self.size - 1:
 			successors.append(State(swap(self.puzzle, (row, col+1), (row, col)), self))
 		return successors
+
+	def is_goal_state(self):
+		id = 1
+		for i in range(self.size):
+			for j in range(self.size):
+				if i == self.size - 1 and j == self.size - 1: 
+					if self.puzzle[i][j] != 0:
+						return False
+				else:
+					if self.puzzle[i][j] != id:
+						return False
+				id += 1
+		return True
+
+	# Reference: https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/
+	def is_solvable(self):
+		flat_puzzle = flatten(self.puzzle)
+		inv_count = 0
+		for i in range(len(flat_puzzle)):
+			for j in range(i+1, len(flat_puzzle)):
+				if flat_puzzle[i] and flat_puzzle[j] and flat_puzzle[i] > flat_puzzle[j]:
+					inv_count += 1
+		if self.size%2 == 1:
+			return inv_count%2 == 0
+		else:
+			x_row, _ = self.get_while_tile()
+			x_row_r = self.size - x_row
+			return x_row_r%2 + inv_count%2 == 1
 
 	def __str__(self):
 		result = ""
@@ -66,20 +75,6 @@ def swap(puzzle, pos1, pos2):
 	return puzzle_copy
 
 
-def is_goal(state):
-	id = 1
-	for i in range(state.height):
-		for j in range(state.width):
-			if i == state.height - 1 and j == state.width - 1: 
-				if state.puzzle[i][j] != 0:
-					return False
-			else:
-				if state.puzzle[i][j] != id:
-					return False
-			id += 1
-	return True
-
-
 def bfs(initial_state):
 	frontier = deque()
 	frontier.append(initial_state)
@@ -92,7 +87,7 @@ def bfs(initial_state):
 	while frontier and i < 10:
 		curr_state = frontier.popleft()
 
-		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
+		if curr_state.is_goal_state(): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
 		expanded_states.append(curr_state.puzzle)
@@ -115,7 +110,7 @@ def dfs(initial_state):
 	while frontier:
 		curr_state = frontier.pop()
 
-		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
+		if curr_state.is_goal_state(): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
 		expanded_states.append(curr_state.puzzle)
@@ -134,9 +129,9 @@ def get_cost(state):
 def get_heuristic(state):
 	num_misplaced = 0
 	id = 1
-	for i in range(state.height):
-		for j in range(state.width):
-			if i == state.height - 1 and j == state.width - 1: 
+	for i in range(state.size):
+		for j in range(state.size):
+			if i == state.size - 1 and j == state.size - 1: 
 				if state.puzzle[i][j] != 0:
 					num_misplaced += 1
 			else:
@@ -149,6 +144,7 @@ def get_heuristic(state):
 def get_f(state):
 	return get_heuristic(state) + get_cost(state)
 
+
 def a_star(initial_state):
 	num_generated = 0
 	frontier = []
@@ -160,7 +156,7 @@ def a_star(initial_state):
 	while frontier:
 		curr_state = heapq.heappop(frontier)[2]
 
-		if is_goal(curr_state): return [curr_state, expanded_states, num_generated]
+		if curr_state.is_goal_state(): return [curr_state, expanded_states, num_generated]
 
 		successors = curr_state.get_successors()
 		expanded_states.append(curr_state.puzzle)
@@ -173,52 +169,53 @@ def a_star(initial_state):
 
 
 def main(argv):
-	# usage = "usage: python3 sliding_puzzle.py -s <search method> -p <puzzle>"
-	if len(argv) != 5: 
-		res_obj = {}
-		res_obj['able_to_solve'] = False
-		res_obj['error'] = "Invalid parameters"
-		printToNode(res_obj)
-	
+	# python3 sliding_puzzle.py 
+	# 	-m <search method>
+	# 	-p <puzzle>
+	# 	-s <puzzle size>
+
 	search_method = ""
 	initial_puzzle = ""
+	puzzle_size = 0
 	i = 1
 	while i < len(argv):
-		if argv[i] == "-s":
+		if argv[i] == "-m":
 			i += 1
 			search_method = argv[i]
 		elif argv[i] == "-p":
 			i += 1
-			initial_puzzle = argv[i]
+			puzzle_str = argv[i]
+		elif argv[i] == "-s":
+			i += 1
+			puzzle_size = int(argv[i])
 		else:
 			res_obj = {}
 			res_obj['able_to_solve'] = False
 			res_obj['error'] = "Invalid parameters"
-			printToNode(res_obj)
+			print_to_node(res_obj)
 		i += 1
 
-	if search_method not in ("bfs", "dfs", "astar") \
-	or not initial_puzzle:
+	initial_puzzle = decode_puzzle(puzzle_str, puzzle_size)
+	if search_method not in ("bfs", "dfs", "astar") or not initial_puzzle:
 		res_obj = {}
 		res_obj['able_to_solve'] = False
 		res_obj['error'] = "Invalid parameters"
-		printToNode(res_obj)
+		print_to_node(res_obj)
 	#################################################################
-	
-	initial_state = read_puzzle(initial_puzzle)
-	result = None
-	if initial_state:	
-		if search_method == "bfs":
-			result = bfs(initial_state)
-		elif search_method == "dfs":
-			result = dfs(initial_state)
-		elif search_method == "astar":
-			result = a_star(initial_state)
-	else:
+
+	initial_state = State(initial_puzzle, None)
+	if not initial_state.is_solvable():
 		res_obj = {}
 		res_obj['able_to_solve'] = False
-		res_obj['error'] = "Invalid input puzzle"
-		printToNode(res_obj)
+		print_to_node(res_obj)
+
+	result = None	
+	if search_method == "bfs":
+		result = bfs(initial_state)
+	elif search_method == "dfs":
+		result = dfs(initial_state)
+	elif search_method == "astar":
+		result = a_star(initial_state)
 		
 	if result:
 		res_obj = {}
@@ -233,11 +230,11 @@ def main(argv):
 		res_obj['num_expanded'] = len(expanded_states)
 		res_obj['expanded'] = expanded_states
 		res_obj['num_generated'] = num_generated
-		printToNode(res_obj)
+		print_to_node(res_obj)
 	else:
 		res_obj = {}
 		res_obj['able_to_solve'] = False
-		printToNode(res_obj)
+		print_to_node(res_obj)
 
 	
 #####################################################################
