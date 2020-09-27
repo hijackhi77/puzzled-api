@@ -3,7 +3,7 @@ node_modules/
 !.gitignore
 
 # ESLint
-!.eslintrc.js
+!.eslintrc
 !.eslintignore
 
 # TypeScript transpiled code folder
