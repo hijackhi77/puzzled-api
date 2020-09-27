@@ -1,6 +1,13 @@
-node_modules
+node_modules/
 .*
 !.gitignore
+
+# ESLint
+!.eslintrc.js
+!.eslintignore
+
+# TypeScript transpiled code folder
+dist/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
