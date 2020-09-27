@@ -1,5 +1,5 @@
-const appName = 'Puzzled'
+const appName = 'Puzzled';
 
 module.exports = {
-    appName
-}
+  appName
+};
