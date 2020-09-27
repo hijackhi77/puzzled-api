@@ -1,16 +1,17 @@
 module.exports = {
-  "env": {
-    "es2021": true,
-    "node": true
+  'env': {
+    'es2021': true,
+    'node': true
   },
-  "extends": "eslint:recommended",
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
+  'extends': 'eslint:recommended',
+  'parserOptions': {
+    'ecmaVersion': 12,
+    'sourceType': 'module'
   },
-  "rules": {
-    "indent": ["error", 2],
-    "semi": ["error", "always"],
-    "quotes": ["error", "single"],
+  'rules': {
+    'indent': ['error', 2],
+    'semi': ['error', 'always'],
+    'quotes': ['error', 'single'],
+    'no-unused-vars': ['error', { 'argsIgnorePattern': 'next' }]
   }
 };
