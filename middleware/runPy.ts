@@ -1,6 +1,6 @@
-const { spawn } = require('child_process');
+import { spawn } from 'child_process';
 
-let prePy = (req) => {
+const prePy = (req: any): void => {
   req.py = [];
   req.py.command = [];
 
@@ -8,7 +8,7 @@ let prePy = (req) => {
   if (req._parsedUrl.pathname === '/run-python' && req.method === 'POST') {
     req.py.command.push('./python/scripts/test.py');
     // Append other parameters
-    for (let key in req.query) {
+    for (const key in req.query) {
       req.py.command.push(req.query[key]);
     }
   } else if (req._parsedUrl.pathname === '/solve' && req.method === 'POST') {
@@ -19,10 +19,10 @@ let prePy = (req) => {
   }
 };
 
-let runPy = (req, res, next) => {
+export const runPy = (req: any, res: any): void => {
   prePy(req);
 
-  let process = spawn('python', req.py.command);
+  const process = spawn('python', req.py.command);
   process.stdout.on('data', (data) => {
     res.write(JSON.parse(JSON.stringify(data.toString())));
   });
@@ -40,8 +40,4 @@ let runPy = (req, res, next) => {
     res.status(200).send();
     console.log(`[INFO] Child process exited with code ${code}`);
   });
-};
-
-module.exports = {
-  runPy
 };
