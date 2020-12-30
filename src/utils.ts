@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import md5 = require('md5');
 
 export const encrypt = (text: string): string => {
-  console.log(__dirname);
   const array = fs.readFileSync('./resource/AESKey.txt').toString().split('\n');
   const key = Buffer.from(array[0].substr(0, 16), 'utf8');
   const iv = Buffer.from(array[1], 'utf8');
@@ -19,7 +18,7 @@ export const decrypt = (text: string): string => {
   return decipher.update(Buffer.from(text, 'base64'), 'binary', 'utf8') + decipher.final('utf8');
 };
 
-export const deepcopy = (object: Record<string, unknown>): Record<string, unknown> => {
+export const deepcopy = (object) => {
   return JSON.parse(JSON.stringify(object));
 };
 
@@ -41,4 +40,11 @@ export const sign = (jsonObj: Record<string, unknown>, secretEncrypted: string):
 
 export const getRandomInt = (max: number): number => {
   return Math.floor(Math.random() * Math.floor(max));
+};
+
+export const swap = (array: any[], i: number, j: number): any[] => {
+  const temp = array[i];
+  array[i] = array[j];
+  array[j] = temp;
+  return array;
 };

@@ -1,6 +1,5 @@
 import express from 'express';
-import { sign } from '../lib/utils';
-import { runPy } from '../middleware/runPy';
+import { sign } from '../utils';
 
 export const router = express.Router();
 
@@ -15,5 +14,3 @@ router.get('/sign', (req, res) => {
 router.get('/validate-sign', (req, res) => {
   res.status(200).send({ isValid: sign(req.body, 'secret') == req.body.sign });
 });
-
-router.post('/run-python', runPy);

@@ -8,7 +8,7 @@ const port = typeof process.env.PORT === 'undefined' ? 3000 : process.env.PORT;
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
 
-import { router as apiRouter } from './routes/api';
+import { router as apiRouter } from './routers/api';
 app.use('/api', apiRouter);
 
 app.listen(port, () =>
