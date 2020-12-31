@@ -1,4 +1,5 @@
 import { deepcopy } from '../../utils';
+import { ERROR_MSG } from '../../errors/constants';
 
 export class SlidingPuzzleState {
   puzzle: number[][];
@@ -20,6 +21,7 @@ export class SlidingPuzzleState {
         }
       }
     }
+    if (!this.whiteTile) throw Error(ERROR_MSG.SLIDING_PUZZLE_STATE_CONSTRUCTION_FAILURE);
   }
 
   getWhiteTile() {
