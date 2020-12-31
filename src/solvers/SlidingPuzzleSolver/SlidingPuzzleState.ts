@@ -40,10 +40,10 @@ export class SlidingPuzzleState {
     const posns = [{row: row-1, col}, {row: row+1, col}, {row, col: col-1}, {row, col: col+1}];
     posns.map((posn) => {
       const {row: r, col: c} = posn;
-      if (0<r && r<this.size && 0<c && c<this.size) {
+      if (0<=r && r<this.size && 0<=c && c<this.size) {
         successors.push(new SlidingPuzzleState(this.swapTile(posn, this.whiteTile), this));
       }
-    });
+    }, this); // Second param for reserving this context
     return successors;
   }
 
