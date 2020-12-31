@@ -7,7 +7,7 @@ node_modules/
 !.eslintignore
 
 # Babel
-!.Babel
+!.babelrc
 
 # TypeScript transpiled code folder
 dist/
